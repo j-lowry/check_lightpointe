@@ -1,4 +1,7 @@
 check_lightpointe
 =================
 
-Nagios check to monitor Lightpointe freespace optics solutions
+Nagios check to monitor Lightpointe,http://www.lightpointe.com/, freespace
+optics solutionsa.
+
+
