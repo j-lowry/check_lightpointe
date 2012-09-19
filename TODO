@@ -3,3 +3,4 @@
 -Get better SNMP error handing in the nagios return
 -Perhaps doing something with the amdRssiOverload, need to figure out what that menas
 -Perhaps add things like firmware data and other crap like that in the DATA returned to nagios
+-Get a build script going with autoconf, just so people know it works
