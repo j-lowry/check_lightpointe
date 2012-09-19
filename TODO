@@ -1,0 +1,5 @@
+09/18/12
+-Figure out if the tracker being on means it is adjusting and how often does that happen
+-Get better SNMP error handing in the nagios return
+-Perhaps doing something with the amdRssiOverload, need to figure out what that menas
+-Perhaps add things like firmware data and other crap like that in the DATA returned to nagios
