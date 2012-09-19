@@ -29,7 +29,7 @@ my $amgTrackerStatus = '1.3.6.1.4.1.9256.1.5.2.9.0';
 # 1 = tracker is on
 # 2 = tracker is off
 # 3 = tracker is unavailable
-my $myAmgTemperature = '1.3.6.1.4.1.9256.1.5.2.10.0';
+my $amgTemperature = '1.3.6.1.4.1.9256.1.5.2.10.0';
 #return and integer in Celsius
 my $amgHeaterThreshold ='1.3.6.1.4.1.9256.1.5.2.11.0';
 my $amgHeaterHyst = '1.3.6.1.4.1.9256.1.5.2.12.0';
@@ -46,6 +46,7 @@ $ENV{'BASH_ENV'}='';
 $ENV{'ENV'}='';
 
 my $opt_c = 'public';
+my $opt_T = 'RSSI';
 
 Getopt::Long::Configure('bundling');
 GetOptions
@@ -53,6 +54,7 @@ GetOptions
     "h" => \$opt_h, "help"      => \$opt_h,
     "H=s" => \$opt_H, "hostname=s"  => \$opt_H,
     "c=s" => \$opt_c, "community=s" => \$opt_c,  
+    "T=s" => \$opt_T, "type=s" => \$opt_T,
 );
 
 if ($opt_V){
@@ -81,22 +83,44 @@ This plugin reports the status of a Lightpointe freespace optics system.";
 my ($session, $error) = Net::SNMP->session(hostname=>$opt_H, 
                                                 community=>$opt_c);
 
-my $result = $session->get_request($amgRssi, $amgLowRssiThreshold,$amgRssiHighThreshold);
-#die "error: ".$session->error unless (defined $result);
+if ( $opt_T eq 'RSSI') {
+    my $result = $session->get_request($amgRssi, $amgLowRssiThreshold,$amgRssiHighThreshold);
+    #die "error: ".$session->error unless (defined $result);
 
-if ( $result->{$amgRssi} <= $result->{$amgLowRssiThreshold} ) {
-    print "RSSI: " . $result->{$amgRssi};
-    exit $ERRORS{'CRITICAL'};
-}
-elsif ( $result->{$amgRssi} <= $result->{$amgRssiHighThreshold} ) {
-    print "RSSI: " . $result->{$amgRssi};
-    exit $ERRORS{'WARNING'};
-}
-elsif ( $result->{$amgRssi} >= $result->{$amgRssiHighThreshold} ) {
-    print "RSSI: " . $result->{$amgRssi};
-    exit $ERRORS{'OK'};
-}
-else {
-    print "ERROR: " . $session->error;
-    exit $ERRORS{'UNKNOWN'};
-}
+    if ( $result->{$amgRssi} <= $result->{$amgLowRssiThreshold} ) {
+        print "RSSI: " . $result->{$amgRssi};
+        exit $ERRORS{'CRITICAL'};
+    }
+    elsif ( $result->{$amgRssi} <= $result->{$amgRssiHighThreshold} ) {
+        print "RSSI: " . $result->{$amgRssi};
+        exit $ERRORS{'WARNING'};
+    }
+    elsif ( $result->{$amgRssi} >= $result->{$amgRssiHighThreshold} ) {
+        print "RSSI: " . $result->{$amgRssi};
+        exit $ERRORS{'OK'};
+    }
+    else {
+        print "ERROR: " . $session->error;
+        exit $ERRORS{'UNKNOWN'};
+    }
+} 
+elsif ( $opt_T eq 'TEMP') {
+    my $result = $session->get_request($amgTemperature, $amgHeaterThreshold, $amgHeaterHyst);
+    if ( $result->{$amgTemperature} <= $result->{$amgHeaterThreshold} ) {
+        print "Temperature: " . $result->{$amgTemperature} . " C";
+        exit $ERRORS{'CRITICAL'};
+    }
+    elsif ( $result->{$amgTemperature} <= $result->{$amgHeaterHyst} ) {
+        print "Temperature: " . $result->{$amgTemperature} . " C";
+        exit $ERRORS{'WARNING'};
+    }
+    elsif ( $result->{$amgTemperature} >= $result->{$amgHeaterHyst} ) {
+        print "Temperature: " . $result->{$amgTemperature} . " C";
+        exit $ERRORS{'OK'};
+    }
+    else {
+        print "ERROR: " . $session->error;
+        exit $ERRORS{'UNKNOWN'};
+    }
+} 
+    
