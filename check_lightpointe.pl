@@ -79,11 +79,24 @@ This plugin reports the status of a Lightpointe freespace optics system.";
 
 
 my ($session, $error) = Net::SNMP->session(hostname=>$opt_H, 
-                                            community=>$opt_c);
-die "Session error: $error" unless ($session);
+                                                community=>$opt_c);
 
-#print $amgRssi;
-my $result = $session->get_request($amgRssi);
-die "error: ".$session->error unless (defined $result);
+my $result = $session->get_request($amgRssi, $amgLowRssiThreshold,$amgRssiHighThreshold);
+#die "error: ".$session->error unless (defined $result);
 
-print "RSSI: " . $result->{$amgRssi} . "\n";
+if ( $result->{$amgRssi} <= $result->{$amgLowRssiThreshold} ) {
+    print "RSSI: " . $result->{$amgRssi};
+    exit $ERRORS{'CRITICAL'};
+}
+elsif ( $result->{$amgRssi} <= $result->{$amgRssiHighThreshold} ) {
+    print "RSSI: " . $result->{$amgRssi};
+    exit $ERRORS{'WARNING'};
+}
+elsif ( $result->{$amgRssi} >= $result->{$amgRssiHighThreshold} ) {
+    print "RSSI: " . $result->{$amgRssi};
+    exit $ERRORS{'OK'};
+}
+else {
+    print "ERROR: " . $session->error;
+    exit $ERRORS{'UNKNOWN'};
+}
